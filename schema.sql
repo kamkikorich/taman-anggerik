@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS "users" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "name" varchar(255) NOT NULL, "email" varchar(255) NOT NULL UNIQUE, "password" varchar(255) NOT NULL, "role" varchar(50) DEFAULT 'view_only' NOT NULL, "created_at" timestamp DEFAULT now() NOT NULL, "updated_at" timestamp DEFAULT now() NOT NULL);
+
+CREATE TABLE IF NOT EXISTS "transactions" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "date" date NOT NULL, "type" varchar(50) NOT NULL, "category" varchar(255) NOT NULL, "description" text NOT NULL, "amount" numeric(12,2) NOT NULL, "wallet" varchar(50) NOT NULL, "receipt_image_url" text, "ocr_data" jsonb, "status" varchar(50) DEFAULT 'draft' NOT NULL, "created_by_id" uuid REFERENCES "users"("id"), "approved_by_id" uuid REFERENCES "users"("id"), "created_at" timestamp DEFAULT now() NOT NULL, "updated_at" timestamp DEFAULT now() NOT NULL);
+
+CREATE TABLE IF NOT EXISTS "monthly_snapshots" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "month" date NOT NULL, "bank_balance" numeric(12,2) NOT NULL, "cash_balance" numeric(12,2) NOT NULL, "total_receipts" numeric(12,2) NOT NULL, "total_expenses" numeric(12,2) NOT NULL, "locked_at" timestamp, "locked_by_id" uuid REFERENCES "users"("id"), "created_at" timestamp DEFAULT now() NOT NULL);
+
+CREATE TABLE IF NOT EXISTS "audit_logs" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "user_id" uuid REFERENCES "users"("id"), "action" varchar(100) NOT NULL, "entity_type" varchar(100) NOT NULL, "entity_id" uuid NOT NULL, "changes" jsonb, "created_at" timestamp DEFAULT now() NOT NULL);
+
+CREATE TABLE IF NOT EXISTS "receipts" ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "transaction_id" uuid REFERENCES "transactions"("id"), "image_url" text NOT NULL, "ocr_raw_text" text, "ocr_confidence" numeric(5,4), "processed_at" timestamp, "created_at" timestamp DEFAULT now() NOT NULL);
