@@ -14,7 +14,7 @@ export default async function UsersPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <img src="https://i.postimg.cc/rFspMy3t/Screenshot-2026-05-04-225319.png" alt="KRT Logo" className="w-10 h-10 rounded-full" />
+              <img src="https://i.postimg.cc/Tw0BvfwH/Screenshot-2026-06-22-211709.png" alt="KRT Logo" className="w-10 h-10 rounded-full" />
               <div>
                 <h1 className="text-xl font-bold text-gray-900">waju.my</h1>
                 <p className="text-xs text-gray-500">Pengurusan Pengguna</p>

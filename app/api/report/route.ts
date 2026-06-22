@@ -38,6 +38,12 @@ export async function GET(request: Request) {
     let bp = 0, be = 0, tp = 0, te = 0;
     for (const t of currentPeriodTx) {
       const a = parseFloat(t.amount);
+      // Pindahan Dalaman: still affects wallet balances but NOT counted in receipts/expenses totals
+      if (t.category === 'Pindahan Dalaman') {
+        if (t.wallet === 'bank') { t.type === 'penerimaan' ? (bp += a) : (be += a); }
+        else { t.type === 'penerimaan' ? (tp += a) : (te += a); }
+        continue;
+      }
       if (t.wallet === 'bank') { t.type === 'penerimaan' ? (bp += a) : (be += a); }
       else { t.type === 'penerimaan' ? (tp += a) : (te += a); }
     }

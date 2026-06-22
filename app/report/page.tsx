@@ -58,10 +58,12 @@ export default function ReportPage() {
     </div>
   );
 
-  const receipts = data.transactions.filter(t => t.type === 'penerimaan');
-  const expenses = data.transactions.filter(t => t.type === 'perbelanjaan');
+  const receipts = data.transactions.filter(t => t.type === 'penerimaan' && t.category !== 'Pindahan Dalaman');
+  const expenses = data.transactions.filter(t => t.type === 'perbelanjaan' && t.category !== 'Pindahan Dalaman');
+  const transfers = data.transactions.filter(t => t.category === 'Pindahan Dalaman');
   const totalReceipts = receipts.reduce((s, t) => s + parseFloat(t.amount), 0);
   const totalExpenses = expenses.reduce((s, t) => s + parseFloat(t.amount), 0);
+  const totalTransfers = transfers.reduce((s, t) => s + parseFloat(t.amount), 0);
   const netBalance = totalReceipts - totalExpenses;
 
   return (
@@ -381,7 +383,7 @@ export default function ReportPage() {
 
           {/* HEADER */}
           <div className="report-header">
-            <img src="https://i.postimg.cc/rFspMy3t/Screenshot-2026-05-04-225319.png" alt="Logo KRT" />
+            <img src="https://i.postimg.cc/Tw0BvfwH/Screenshot-2026-06-22-211709.png" alt="Logo KRT" />
             <div className="header-text">
               <div className="org-name">Kawasan Rukun Tetangga Taman Anggerik Keningau</div>
               <div className="org-sub">
@@ -488,7 +490,43 @@ export default function ReportPage() {
             </tbody>
           </table>
 
-          {/* NET BALANCE */}
+          {/* TRANSFERS (Internal Movements) */}
+      {transfers.length > 0 && (
+        <>
+          <div className="section-title" style={{ marginTop: '6mm', background: '#666' }}>C. Pindahan Dalaman (Tidak Dikira Dalam Penerimaan/Perbelanjaan)</div>
+          <table className="tx-table">
+            <thead>
+              <tr>
+                <th className="num">Bil.</th>
+                <th className="date">Tarikh</th>
+                <th>Butiran / Keterangan</th>
+                <th className="wallet">Dompet</th>
+                <th className="amount">Jumlah (RM)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {transfers.map((t, i) => (
+                <tr key={i}>
+                  <td className="num">{i + 1}</td>
+                  <td>{formatDate(t.date)}</td>
+                  <td>{t.description}</td>
+                  <td>{t.wallet === 'bank' ? 'Bank Rakyat' : 'Tunai'}</td>
+                  <td className="amount">{formatRM(parseFloat(t.amount))}</td>
+                </tr>
+              ))}
+              <tr className="subtotal">
+                <td colSpan={4} style={{ textAlign: 'right', paddingRight: '3mm' }}>JUMLAH PINDAHAN</td>
+                <td className="amount">RM {formatRM(totalTransfers)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style={{ fontSize: '8pt', fontStyle: 'italic', color: '#666', marginTop: '2mm' }}>
+            * Pindahan antara dompet (Bank ↔ Tunai) tidak dikira dalam Jumlah Penerimaan/Perbelanjaan. Ia hanya menggambarkan pergerakan tunai antara akaun.
+          </p>
+        </>
+      )}
+
+      {/* NET BALANCE */}
           <div className="net-section" style={{ marginTop: '6mm' }}>
             <table>
               <tbody>

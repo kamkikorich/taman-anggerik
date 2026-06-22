@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
 });
 
 export default function FinancialReport({ transactions, startDate, endDate, bakiAwalBank, bakiAwalTunai, bankBalance, cashBalance, totalBalance }: any) {
-  const penerimaan = transactions.filter((t: any) => t.type === 'penerimaan');
-  const perbelanjaan = transactions.filter((t: any) => t.type === 'perbelanjaan');
+  const penerimaan = transactions.filter((t: any) => t.type === 'penerimaan' && t.category !== 'Pindahan Dalaman');
+  const perbelanjaan = transactions.filter((t: any) => t.type === 'perbelanjaan' && t.category !== 'Pindahan Dalaman');
 
   const totalPenerimaan = penerimaan.reduce((s: number, t: any) => s + parseFloat(t.amount), 0);
   const totalPerbelanjaan = perbelanjaan.reduce((s: number, t: any) => s + parseFloat(t.amount), 0);
@@ -34,7 +34,7 @@ export default function FinancialReport({ transactions, startDate, endDate, baki
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Image src="https://i.postimg.cc/rFspMy3t/Screenshot-2026-05-04-225319.png" style={styles.logo} />
+          <Image src="https://i.postimg.cc/Tw0BvfwH/Screenshot-2026-06-22-211709.png" style={styles.logo} />
           <Text style={styles.title}>PENYATA PENERIMAAN DAN PERBELANJAAN</Text>
           <Text style={styles.subtitle}>KRT TAMAN ANGGERIK KENINGAU BAGI {startDate} HINGGA {endDate}</Text>
         </View>

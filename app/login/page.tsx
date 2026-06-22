@@ -54,7 +54,7 @@ function LoginForm() {
           <div className="relative text-center">
              <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl"></div>
              <img 
-              src="https://i.postimg.cc/rFspMy3t/Screenshot-2026-05-04-225319.png" 
+              src="https://i.postimg.cc/Tw0BvfwH/Screenshot-2026-06-22-211709.png" 
               alt="KRT Logo" 
               className="w-48 h-48 mx-auto mb-8 object-contain drop-shadow-2xl brightness-110" 
             />
@@ -82,7 +82,7 @@ function LoginForm() {
         <div className="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-[#0f172a]/40">
           <div className="md:hidden text-center mb-8">
             <img 
-              src="https://i.postimg.cc/rFspMy3t/Screenshot-2026-05-04-225319.png" 
+              src="https://i.postimg.cc/Tw0BvfwH/Screenshot-2026-06-22-211709.png" 
               alt="KRT Logo" 
               className="w-24 h-24 mx-auto mb-4 object-contain" 
             />

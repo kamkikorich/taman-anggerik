@@ -16,6 +16,8 @@ export default function TransactionForm({ userRole, userId }: { userRole: string
     amount: '',
     wallet: 'bank',
   });
+  const [fromWallet, setFromWallet] = useState('bank');
+  const [toWallet, setToWallet] = useState('tunai');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -29,10 +31,15 @@ export default function TransactionForm({ userRole, userId }: { userRole: string
     setSuccess('');
 
     try {
+      const payload: any = { ...formData };
+      if (formData.type === 'pindahan') {
+        payload.fromWallet = fromWallet;
+        payload.toWallet = toWallet;
+      }
       const res = await fetch('/api/transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -41,7 +48,7 @@ export default function TransactionForm({ userRole, userId }: { userRole: string
         throw new Error(data.error || 'Failed to create transaction');
       }
 
-      setSuccess('Transaksi berjaya ditambah!');
+      setSuccess(formData.type === 'pindahan' ? 'Pindahan antara dompet berjaya direkodkan!' : 'Transaksi berjaya ditambah!');
       setFormData({
         date: new Date().toISOString().split('T')[0],
         type: 'penerimaan',
@@ -50,6 +57,8 @@ export default function TransactionForm({ userRole, userId }: { userRole: string
         amount: '',
         wallet: 'bank',
       });
+      setFromWallet('bank');
+      setToWallet('tunai');
 
       // Refresh balance
       window.location.reload();
@@ -117,6 +126,7 @@ export default function TransactionForm({ userRole, userId }: { userRole: string
             >
               <option value="penerimaan">Penerimaan (Debit)</option>
               <option value="perbelanjaan">Perbelanjaan (Kredit)</option>
+              <option value="pindahan">Pindahan Dalaman (Bank ↔ Tunai)</option>
             </select>
           </div>
 
@@ -130,24 +140,57 @@ export default function TransactionForm({ userRole, userId }: { userRole: string
               required
             >
               <option value="">Pilih Kategori</option>
-              {categories[formData.type as keyof typeof categories].map((cat) => (
+              {formData.type !== 'pindahan' && categories[formData.type as keyof typeof categories].map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
+              {formData.type === 'pindahan' && (
+                <option value="Pindahan Dalaman">Pindahan Dalaman</option>
+              )}
             </select>
           </div>
 
-          {/* Wallet */}
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sumber Kewangan</label>
-            <select
-              value={formData.wallet}
-              onChange={(e) => setFormData({ ...formData, wallet: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-bold appearance-none cursor-pointer"
-            >
-              <option value="bank">Bank Rakyat (1102279328)</option>
-              <option value="tunai">Tunai di Tangan</option>
-            </select>
-          </div>
+          {formData.type === 'pindahan' ? (
+            <>
+              {/* From Wallet */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dari Dompet</label>
+                <select
+                  value={fromWallet}
+                  onChange={(e) => setFromWallet(e.target.value)}
+                  className="w-full px-4 py-3 bg-rose-50 border border-rose-200 rounded-2xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition-all font-bold appearance-none cursor-pointer"
+                >
+                  <option value="bank">Bank Rakyat (1102279328)</option>
+                  <option value="tunai">Tunai di Tangan</option>
+                </select>
+              </div>
+
+              {/* To Wallet */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Ke Dompet</label>
+                <select
+                  value={toWallet}
+                  onChange={(e) => setToWallet(e.target.value)}
+                  className="w-full px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all font-bold appearance-none cursor-pointer"
+                >
+                  <option value="bank">Bank Rakyat (1102279328)</option>
+                  <option value="tunai">Tunai di Tangan</option>
+                </select>
+              </div>
+            </>
+          ) : (
+            /* Wallet */
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Sumber Kewangan</label>
+              <select
+                value={formData.wallet}
+                onChange={(e) => setFormData({ ...formData, wallet: e.target.value })}
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-bold appearance-none cursor-pointer"
+              >
+                <option value="bank">Bank Rakyat (1102279328)</option>
+                <option value="tunai">Tunai di Tangan</option>
+              </select>
+            </div>
+          )}
 
           {/* Amount */}
           <div className="md:col-span-2 space-y-2">

@@ -57,15 +57,43 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const { date, type, category, description, amount, wallet } = body;
-    if (!date || !type || !category || !description || !amount || !wallet) return NextResponse.json({ error: 'Missing' }, { status: 400 });
+    const role = (session.user as any).role;
+
+    if (!date || !type || !amount) return NextResponse.json({ error: 'Missing' }, { status: 400 });
     if (!isValidDate(date)) return NextResponse.json({ error: 'Invalid date' }, { status: 400 });
-    if (!['penerimaan', 'perbelanjaan'].includes(type)) return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+    if (!['penerimaan', 'perbelanjaan', 'pindahan'].includes(type)) return NextResponse.json({ error: 'Invalid type' }, { status: 400 });
+
+    // For 'pindahan', we expect `fromWallet` and `toWallet` in body
+    if (type === 'pindahan') {
+      const { fromWallet, toWallet } = body;
+      if (!fromWallet || !toWallet) return NextResponse.json({ error: 'Missing fromWallet/toWallet' }, { status: 400 });
+      if (!['bank', 'tunai'].includes(fromWallet) || !['bank', 'tunai'].includes(toWallet)) return NextResponse.json({ error: 'Invalid fromWallet/toWallet' }, { status: 400 });
+      if (fromWallet === toWallet) return NextResponse.json({ error: 'From and To wallets must differ' }, { status: 400 });
+
+      const desc = (description || `Pindahan dari ${fromWallet} ke ${toWallet}`).trim();
+      const txOut = await db.insert(transactions).values({
+        date, type: 'perbelanjaan', category: 'Pindahan Dalaman',
+        description: `${desc} (keluar)`, amount: amount.toString(), wallet: fromWallet,
+        createdById: (session.user as any).id,
+        status: ['pengerusi', 'bendahari'].includes(role) ? 'approved' : 'draft',
+      }).returning();
+      const txIn = await db.insert(transactions).values({
+        date, type: 'penerimaan', category: 'Pindahan Dalaman',
+        description: `${desc} (masuk)`, amount: amount.toString(), wallet: toWallet,
+        createdById: (session.user as any).id,
+        status: ['pengerusi', 'bendahari'].includes(role) ? 'approved' : 'draft',
+      }).returning();
+
+      return NextResponse.json({ transferPair: [txOut[0], txIn[0]] });
+    }
+
+    // For non-pindahan: category and wallet are required
+    if (!category || !description || !wallet) return NextResponse.json({ error: 'Missing' }, { status: 400 });
     if (!['bank', 'tunai'].includes(wallet)) return NextResponse.json({ error: 'Invalid wallet' }, { status: 400 });
 
     const amt = parseFloat(amount);
     if (isNaN(amt) || amt <= 0) return NextResponse.json({ error: 'Invalid amount' }, { status: 400 });
 
-    const role = (session.user as any).role;
     const newTx = await db.insert(transactions).values({
       date, type, category, description, amount: amount.toString(), wallet,
       createdById: (session.user as any).id,
